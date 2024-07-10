@@ -22,4 +22,6 @@ class InvoiceData
     public string $oldGlassRemoval = '';
     public string $replacementWork = '';
     public string $finalPrice = '';
+    public int $quantity = 1;
+
 }

@@ -2,11 +2,21 @@
 
 use classes\InvoiceData;
 
+function get_base64_image($file_path): string
+{
+    if (file_exists($file_path)) {
+        $image_data = file_get_contents($file_path);
+        $base64 = base64_encode($image_data);
+        return 'data:image/jpeg;base64,' . $base64;
+    }
+    return '';
+}
+
 function extract_final_price($data): float
 {
     foreach ($data as $item) {
         if ($item['label'] === 'Galutinė kaina') {
-            $price = str_replace([' ', '€', ','], ['', '', '.'], $item['value']);
+            $price = str_replace([' ', ','], ['', '.'], $item['value']);
             return (float)$price * 100;
         }
     }
@@ -109,4 +119,17 @@ function map_data_to_object($data): InvoiceData
     }
 
     return $invoiceData;
+}
+
+function get_next_invoice_number() {
+    $invoice_number = get_option('next_invoice_number', 1); // Get the current invoice number from the database, default to 1 if not set
+    update_option('next_invoice_number', $invoice_number + 1); // Increment the invoice number and save it back to the database
+    return str_pad($invoice_number, 5, '0', STR_PAD_LEFT); // Pad the number with zeros to make it 5 digits
+}
+
+function get_today_date_formatted() {
+    $year = date('Y');
+    $month = date('m');
+    $day = date('d');
+    return "Metai: $year Mėnuo: $month d.: $day";
 }

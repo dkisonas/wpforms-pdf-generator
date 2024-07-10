@@ -31,7 +31,7 @@
             max-width: 100px;
             position: absolute;
             top: 0;
-            right: 0;
+            left: 0;
         }
 
         .header h1 {
@@ -66,11 +66,21 @@
         .signature {
             margin-top: 40px;
             text-align: left;
+            display: flex;
+            justify-content: space-between;
         }
 
         .signature div {
-            display: inline-block;
             width: 48%;
+            text-align: left;
+        }
+
+        .signature img {
+            max-height: 70px; /* Adjusted size of signature */
+        }
+
+        .total {
+            margin-top: 20px;
             text-align: left;
         }
     </style>
@@ -78,10 +88,10 @@
 <body>
 <div class="container">
     <div class="header">
+        <img src="../assets/logo.png" alt="Logo">
         <h2>Išankstinė sąskaita – faktūra</h2>
         <h3>Serija SPI Nr.: 00001</h3>
         <h4>Data: Metai Mėnuo d.</h4>
-        <img src="/assets/logo.png" alt="Logo">
     </div>
 
     <div class="section">
@@ -133,12 +143,12 @@
         </table>
     </div>
 
+    <p class="total">Suma žodžiais : Du šimtai šešiasdešimt eurų ir nulis euro centų</p>
     <div class="signature">
-        <p>Suma žodžiais : Du šimtai šešiasdešimt eurų ir nulis euro centų</p>
         <div>
             <p>Pardavėjas :</p>
             <p>Direktorius Gytis Sereika</p>
-            <p><img src="/assets/signature.png" alt="Signature" style="max-height: 50px;"></p>
+            <p><img src="../assets/signature.png" alt="Signature"></p>
             <p>AV</p>
         </div>
         <div>

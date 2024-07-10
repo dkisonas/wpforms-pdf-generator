@@ -36,3 +36,4 @@ Thumbs.db
 # Ignore temporary files
 *.swp
 *~
+/custom-pdf-plugin.zip

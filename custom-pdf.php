@@ -22,6 +22,13 @@ add_action('admin_post_generate_pdf', 'generate_pdf');
 add_action('admin_post_nopriv_generate_pdf', 'generate_pdf');
 add_action('wp_enqueue_scripts', 'enqueue_custom_assets');
 
+function initialize_invoice_number() {
+    if (get_option('next_invoice_number') === false) {
+        add_option('next_invoice_number', 1);
+    }
+}
+add_action('init', 'initialize_invoice_number');
+
 // Main function to generate PDF
 function generate_pdf(): void
 {
