@@ -54,7 +54,11 @@ function generate_pdf(): void
 
         $pdf_path = create_and_stream_pdf($html);
 
-        send_email_with_attachment($pdf_path);
+        log_message('PDF generated and saved to ' . $pdf_path);
+
+        $to = get_company_email();
+
+        send_email_with_attachment($to, $pdf_path);
         unlink($pdf_path);
 
     } catch (Exception $e) {

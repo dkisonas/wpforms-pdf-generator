@@ -1,14 +1,14 @@
 <?php
 
 
-function send_email_with_attachment($attachment_path): void
+function send_email_with_attachment($to, $attachment_path): void
 {
-    log_message("trying to send email");
-    $COMPANY_NAME = "Stiklopaketai24.lt";
+    log_message("trying to send email to: " . $to);
+    $company_name = get_company_name();
 
-    $to = "domkisonas@gmail.com";
-    $subject = 'Naujai pateikta užklausa ' . $COMPANY_NAME;
-    $body = '';
+
+    $subject = 'Naujai pateikta užklausa ' . $company_name;
+    $body = 'Naujai pateikta užklausa ' . $company_name;
     $headers = array('Content-Type: text/html; charset=UTF-8');
     $attachments = array($attachment_path);
 

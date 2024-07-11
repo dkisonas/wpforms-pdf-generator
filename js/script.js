@@ -2,7 +2,7 @@ import { mapDataToInvoice } from './mapper.js';
 
 
 let allowFormSubmit = false;
-const FORM_ID = 'wpforms-form-13';
+const FORM_ID = 'wpforms-form-1825';
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeButtonListeners();

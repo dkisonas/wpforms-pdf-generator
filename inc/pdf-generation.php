@@ -23,7 +23,7 @@ function create_and_stream_pdf($html): string
 
 function generate_html(InvoiceData $invoiceData): bool|string
 {
-    $COMPANY_NAME = "Stiklopaketai24.lt";
+    $company_name = get_company_name();
     $invoice_number = get_next_invoice_number();
     $today_date = get_today_date_formatted();
     $amountInWords = convert_number_to_words($invoiceData->finalPrice);
@@ -122,7 +122,7 @@ function generate_html(InvoiceData $invoiceData): bool|string
     <body>
     <div class="container">
         <div class="header">
-            <h1><?= $COMPANY_NAME ?></h1>
+            <h1><?= $company_name ?></h1>
             <h2>Išankstinė sąskaita – faktūra</h2>
             <h3>Serija SPI Nr.: <?= $invoice_number ?></h3>
             <h4>Data: <?= $today_date ?></h4>

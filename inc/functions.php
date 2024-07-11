@@ -94,3 +94,13 @@ function upload_pdf_to_wordpress(?string $output): string
     file_put_contents($pdf_path, $output);
     return $pdf_path;
 }
+
+function get_company_name(): string
+{
+    return "Stiklopaketai24.lt";
+}
+
+function get_company_email(): string
+{
+    return "stiklopaketai24@gmail.com";
+}
