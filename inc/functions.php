@@ -7,48 +7,49 @@ use classes\ProductData;
 function map_data_to_objects($data): InvoiceData
 {
     $invoiceData = new InvoiceData();
-    $invoiceData->personalData = map_personal_data($data['personalData']);
-    $invoiceData->finalPrice = $data['finalPrice'];
-    $invoiceData->products = map_products($data['products']);
+    $invoiceData->personalData = map_personal_data($data['personalData'] ?? []);
+    $invoiceData->finalPrice = $data['finalPrice'] ?? 0.0;
+    $invoiceData->products = map_products($data['products'] ?? []);
     return $invoiceData;
 }
 
-function map_products(mixed $products): array
+function map_products(array $products): array
 {
     $mappedProducts = [];
     foreach ($products as $product) {
         $mappedProduct = new ProductData();
-        $mappedProduct->category = $product['category'];
-        $mappedProduct->glassPackageType = $product['glassPackageType'];
-        $mappedProduct->narrowGlazing = $product['narrowGlazing'];
-        $mappedProduct->height = $product['height'];
-        $mappedProduct->width = $product['width'];
-        $mappedProduct->frame = $product['frame'];
-        $mappedProduct->transport = $product['transport'];
-        $mappedProduct->glassImitation = $product['glassImitation'];
-        $mappedProduct->oldGlassRemoval = $product['oldGlassRemoval'];
-        $mappedProduct->finalPrice = $product['finalPrice'];
-        $mappedProduct->glassThickness = $product['glassThickness'];
-        $mappedProduct->glassStructure = $product['glassStructure'];
-        $mappedProduct->replacementWork = $product['replacementWork'];
-        $mappedProduct->basePrice = $product['basePrice'];
-        $mappedProduct->quantity = $product['quantity'];
-        $mappedProduct->totalPrice = $product['totalPrice'];
+        $mappedProduct->category = $product['category'] ?? '';
+        $mappedProduct->glassPackageType = $product['glassPackageType'] ?? '';
+        $mappedProduct->narrowGlazing = $product['narrowGlazing'] ?? '';
+        $mappedProduct->height = $product['height'] ?? '';
+        $mappedProduct->width = $product['width'] ?? '';
+        $mappedProduct->frame = $product['frame'] ?? '';
+        $mappedProduct->transport = $product['transport'] ?? '';
+        $mappedProduct->glassImitation = $product['glassImitation'] ?? '';
+        $mappedProduct->oldGlassRemoval = $product['oldGlassRemoval'] ?? '';
+        $mappedProduct->finalPrice = $product['finalPrice'] ?? 0.0;
+        $mappedProduct->glassThickness = $product['glassThickness'] ?? '';
+        $mappedProduct->glassStructure = $product['glassStructure'] ?? '';
+        $mappedProduct->replacementWork = $product['replacementWork'] ?? '';
+        $mappedProduct->basePrice = $product['basePrice'] ?? 0.0;
+        $mappedProduct->quantity = $product['quantity'] ?? 0;
+        $mappedProduct->totalPrice = $product['totalPrice'] ?? 0.0;
+        $mappedProduct->description = $mappedProduct->category;
         $mappedProducts[] = $mappedProduct;
     }
     return $mappedProducts;
 }
 
-function map_personal_data(mixed $personalData): PersonalData
+function map_personal_data(array $personalData): PersonalData
 {
     $mappedPersonalData = new PersonalData();
-    $mappedPersonalData->companyName = $personalData['companyName'];
-    $mappedPersonalData->companyCode = $personalData['companyCode'];
-    $mappedPersonalData->pvmCode = $personalData['pvmCode'];
-    $mappedPersonalData->mobile = $personalData['mobile'];
-    $mappedPersonalData->address = $personalData['address'];
-    $mappedPersonalData->email = $personalData['email'];
-    $mappedPersonalData->name = $personalData['name'];
+    $mappedPersonalData->companyName = $personalData['companyName'] ?? '';
+    $mappedPersonalData->companyCode = $personalData['companyCode'] ?? '';
+    $mappedPersonalData->pvmCode = $personalData['pvmCode'] ?? '';
+    $mappedPersonalData->mobile = $personalData['mobile'] ?? '';
+    $mappedPersonalData->address = $personalData['address'] ?? '';
+    $mappedPersonalData->email = $personalData['email'] ?? '';
+    $mappedPersonalData->name = $personalData['name'] ?? '';
     return $mappedPersonalData;
 }
 
@@ -64,7 +65,7 @@ function get_today_date_formatted(): string
     $year = date('Y');
     $month = date('m');
     $day = date('d');
-    return "Metai: $year Mėnuo: $month d.: $day";
+    return "Metai: $year Mėnuo: $month $day d.";
 }
 
 function log_message($message)

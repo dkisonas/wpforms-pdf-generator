@@ -24,11 +24,13 @@ add_action('admin_post_generate_pdf', 'generate_pdf');
 add_action('admin_post_nopriv_generate_pdf', 'generate_pdf');
 add_action('wp_enqueue_scripts', 'enqueue_custom_assets');
 
-function initialize_invoice_number() {
+function initialize_invoice_number()
+{
     if (get_option('next_invoice_number') === false) {
         add_option('next_invoice_number', 1);
     }
 }
+
 add_action('init', 'initialize_invoice_number');
 
 // Enable error reporting
@@ -61,7 +63,8 @@ function generate_pdf(): void
     }
 }
 
-function enqueue_custom_assets() {
+function enqueue_custom_assets()
+{
     // Register the modules
     wp_register_script_module(
         '@my-plugin/classes',
@@ -82,7 +85,7 @@ function enqueue_custom_assets() {
     );
 
     // Localize script for ajax URL
-    wp_localize_script('custom-number-to-words-script', 'customNumberToWords', array(
+    wp_localize_script('@my-plugin/script', 'customNumberToWords', array(
         'generatePdfUrl' => admin_url('admin-post.php?action=generate_pdf')
     ));
 }

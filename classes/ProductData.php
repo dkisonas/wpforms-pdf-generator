@@ -4,6 +4,7 @@ namespace classes;
 
 class ProductData
 {
+    public string $description = '';
     public string $category = '';
     public string $glassPackageType = '';
     public string $narrowGlazing = '';

@@ -147,23 +147,23 @@ function generate_html(InvoiceData $invoiceData): bool|string
                         "Swedbank" AB
                     </td>
                     <td>
-                        <?php if (!empty($invoiceData->companyName)) { ?>
-                            Įmonės pavadinimas: <?= $invoiceData->companyName; ?><br>
+                        <?php if (!empty($invoiceData->personalData->companyName)) { ?>
+                            Įmonės pavadinimas: <?= $invoiceData->personalData->companyName; ?><br>
                         <?php } ?>
-                        <?php if (!empty($invoiceData->address)) { ?>
-                            Adresas: <?= $invoiceData->address; ?><br>
+                        <?php if (!empty($invoiceData->personalData->address)) { ?>
+                            Adresas: <?= $invoiceData->personalData->address; ?><br>
                         <?php } ?>
-                        <?php if (!empty($invoiceData->mobile)) { ?>
-                            Tel.: <?= $invoiceData->mobile; ?><br>
+                        <?php if (!empty($invoiceData->personalData->mobile)) { ?>
+                            Tel.: <?= $invoiceData->personalData->mobile; ?><br>
                         <?php } ?>
-                        <?php if (!empty($invoiceData->email)) { ?>
-                            El. paštas: <?= $invoiceData->email; ?><br>
+                        <?php if (!empty($invoiceData->personalData->email)) { ?>
+                            El. paštas: <?= $invoiceData->personalData->email; ?><br>
                         <?php } ?>
-                        <?php if (!empty($invoiceData->companyCode)) { ?>
-                            Įmonės kodas: <?= $invoiceData->companyCode; ?><br>
+                        <?php if (!empty($invoiceData->personalData->companyCode)) { ?>
+                            Įmonės kodas: <?= $invoiceData->personalData->companyCode; ?><br>
                         <?php } ?>
-                        <?php if (!empty($invoiceData->pvmCode)) { ?>
-                            PVM kodas: <?= $invoiceData->pvmCode; ?>
+                        <?php if (!empty($invoiceData->personalData->pvmCode)) { ?>
+                            PVM kodas: <?= $invoiceData->personalData->pvmCode; ?>
                         <?php } ?>
                     </td>
                 </tr>
