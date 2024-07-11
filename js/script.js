@@ -35,7 +35,7 @@ function handleButtonClick(event) {
         console.log(allData)
         const invoiceData = mapDataToInvoice(allData);
         console.log('invoiceData:', invoiceData);
-        sendFormDataToServer(allData, event);
+        sendFormDataToServer(invoiceData, event);
     }
 }
 

@@ -21,4 +21,13 @@ class ProductData
     public float $basePrice = 0.0;
     public int $quantity = 0;
     public float $totalPrice = 0.0;
+
+    public function getDescription(): string
+    {
+        $description = $this->height . "x" . $this->width . " " . $this->glassStructure . " " . $this->glassThickness;
+        if (str_contains($this->frame, 'Termo (TGI)')) {
+            $description .= ' TGI';
+        }
+        return $description;
+    }
 }

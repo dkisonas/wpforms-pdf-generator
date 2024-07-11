@@ -3,6 +3,7 @@
 use classes\InvoiceData;
 use classes\PersonalData;
 use classes\ProductData;
+use NumberToWords\NumberToWords;
 
 function map_data_to_objects($data): InvoiceData
 {
@@ -68,9 +69,26 @@ function get_today_date_formatted(): string
     return "Metai: $year Mėnuo: $month $day d.";
 }
 
-function log_message($message)
+function convert_number_to_words($number): string
+{
+    $numberToWords = new NumberToWords();
+    $currencyTransformer = $numberToWords->getCurrencyTransformer('lt');
+    $price = (float)$number * 100;
+    return $currencyTransformer->toWords($price, 'EUR');
+}
+
+function log_message($message): void
 {
     $log_file = plugin_dir_path(__FILE__) . 'pdf_generation.log';
     $timestamp = date("Y-m-d H:i:s");
     file_put_contents($log_file, "[$timestamp] $message" . PHP_EOL, FILE_APPEND);
+}
+
+function upload_pdf_to_wordpress(?string $output): string
+{
+    $upload_dir = wp_upload_dir();
+    $unique_filename = 'generated_pdf_' . uniqid() . '.pdf';
+    $pdf_path = $upload_dir['path'] . '/' . $unique_filename;
+    file_put_contents($pdf_path, $output);
+    return $pdf_path;
 }

@@ -1,8 +1,8 @@
 <?php
 /*
-Plugin Name: Custom Number to Words
-Description: A custom plugin to use the NumberToWords library.
-Version: 1.3
+Plugin Name: WPForms Custom PDF
+Description: WPForms Custom PDF plugin
+Version: 1.4
 Author: Your Name
 */
 
@@ -15,10 +15,7 @@ require_once plugin_dir_path(__FILE__) . 'classes/ProductData.php';
 require_once plugin_dir_path(__FILE__) . 'classes/PersonalData.php';
 require_once plugin_dir_path(__FILE__) . 'inc/functions.php';
 require_once plugin_dir_path(__FILE__) . 'inc/pdf-generation.php';
-
-use Dompdf\Dompdf;
-use Dompdf\Options;
-use NumberToWords\NumberToWords;
+require_once plugin_dir_path(__FILE__) . 'inc/send-email.php';
 
 add_action('admin_post_generate_pdf', 'generate_pdf');
 add_action('admin_post_nopriv_generate_pdf', 'generate_pdf');
@@ -47,16 +44,18 @@ function generate_pdf(): void
 
         if (!$data) {
             log_message('No data received');
-            echo 'No data received';
             return;
         }
 
         log_message('Data received: ' . json_encode($data));
 
-        $invoiceData = map_data_to_objects($data);
-        $html = generate_html($invoiceData);
+        $invoice_data = map_data_to_objects($data);
+        $html = generate_html($invoice_data);
 
-        create_and_stream_pdf($html);
+        $pdf_path = create_and_stream_pdf($html);
+
+        send_email_with_attachment($pdf_path);
+        unlink($pdf_path);
 
     } catch (Exception $e) {
         log_message('Exception: ' . $e->getMessage());
