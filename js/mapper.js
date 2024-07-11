@@ -17,7 +17,7 @@ export function mapDataToInvoice(data) {
         productFields.forEach(field => {
             mapProductData(product, field);
         });
-        product.totalPrice = product.basePrice * product.quantity;
+        product.basePrice = product.totalPrice / product.quantity
         return product;
     });
 
@@ -28,84 +28,99 @@ export function mapDataToInvoice(data) {
 }
 
 export function mapPersonalData(personalData, field) {
-    const value = field.value;
+    const value = field.value || null;
 
-    switch (field.label) {
-        case 'Įmonės pavadinimas':
+    switch (field.label.trim().toLowerCase()) {
+        case 'įmonės pavadinimas':
             personalData.companyName = value;
             break;
-        case 'Įmonės kodas':
+        case 'įmonės kodas':
             personalData.companyCode = value;
             break;
-        case 'PVM kodas':
+        case 'pvm kodas':
             personalData.pvmCode = value;
             break;
-        case 'Mobilusis':
+        case 'mobilusis':
             personalData.mobile = value;
             break;
-        case 'Adresas':
+        case 'adresas':
             personalData.address = value;
             break;
-        case 'El.Pašto adresas':
+        case 'el.pašto adresas':
+        case 'el. pašto adresas': // Added case for minor variations
             personalData.email = value;
             break;
-        case 'Vardas ir Pavardė':
+        case 'vardas ir pavardė':
             personalData.name = value;
             break;
     }
 }
 
 function mapProductData(product, field) {
-    const value = field.value;
+    let value = field.value || null;
 
-    switch (field.label) {
-        case 'Pasirinkite kategoriją':
+    console.log(field)
+    if (!value) return
+
+    // Convert 'Reikia' and 'Nereikia' to true and false
+    if (value === 'Reikia') value = true;
+    if (value === 'Nereikia') value = false;
+
+    const fieldLabel = field.label.trim().toLowerCase();
+
+    switch (true) {
+        case fieldLabel.includes('pasirinkite kategoriją'):
             product.category = value;
             break;
-        case 'Pasirinkite stiklo paketo tipą':
+        case fieldLabel.includes('pasirinkite stiklo paketo tipą'):
             product.glassPackageType = value;
             break;
-        case 'Ar reikia siaurinti stiklajuoste?':
-            product.narrowGlazing = value;
+        case fieldLabel.includes('ar reikia siaurinti stiklajuoste'):
+            product.isNarrowGlazingNeeded = value;
             break;
-        case 'Stiklo paketo aukštis mm.':
+        case fieldLabel.includes('stiklo paketo aukštis mm'):
             product.height = value;
             break;
-        case 'Stiklo paketo plotis mm.':
+        case fieldLabel.includes('stiklo paketo plotis mm'):
             product.width = value;
             break;
-        case 'Pasirinkti stiklo paketo rėmelį':
-            product.frame = value;
+        case fieldLabel.includes('pasirinkti stiklo paketo rėmelį'):
+        case fieldLabel.includes('pasirinkti stiklo paketo rėmeli'):
+        case fieldLabel.includes('pasirinkite stiklo paketo rėmelį'):
+            product.frameType = value;
             break;
-        case 'Transportavimas':
-            product.transport = value;
+        case fieldLabel.includes('transportavimas'):
+            product.isTransportNeeded = value;
             break;
-        case 'Imitacijos stiklo pakete':
-            product.glassImitation = value;
+        case fieldLabel.includes('imitacijos stiklo pakete'):
+            product.hasGlassImitation = value;
             break;
-        case 'Seno stiklo paketo išvežimas':
-            product.oldGlassRemoval = value;
+        case fieldLabel.includes('seno stiklo paketo išvežimas'):
+            product.hasOldGlassRemoval = value;
             break;
-        case 'Galutinė kaina':
-            product.finalPrice = parseFloat(value.replace(/ /g, '').replace(',', '.'));
-            break;
-        case 'Pasirinkite dviejų stiklo paketo storį':
-        case 'Pasirinkite trijų stiklo paketo storį':
+        case fieldLabel.includes('dviejų stiklo paketo storį'):
+        case fieldLabel.includes('trijų stiklo paketo storį'):
             product.glassThickness = value;
             break;
-        case 'Pasirinkite stiklo paketo struktūrą':
-            product.glassStructure = value;
+        case fieldLabel.includes('pasirinkite stiklo paketo struktūrą'):
+            if (product.glassStructure) {
+                product.quantity = parseInt(value, 10);
+            } else {
+                product.glassStructure = value;
+            }
             break;
-        case 'Pakeitimo darbai':
-        case 'Pakeitimo darbai klijuotos medienos':
-        case 'Pakeitimo darbai šarvo durys':
-            product.replacementWork = value;
+        case fieldLabel.includes('pakeitimo darbai'):
+        case fieldLabel.includes('pakeitimo darbai klijuotos medienos'):
+        case fieldLabel.includes('pakeitimo darbai šarvo durys'):
+            product.isReplacementWorkNeeded = value;
             break;
-        case 'Kiekis':
-            product.quantity = parseInt(value, 10);
+        case fieldLabel.includes('galutinė kaina'):
+            const price = parseFloat(value.replace(/[^0-9.-]+/g, ""))
+            product.totalPrice = price;
             break;
-        case 'Kaina':
-            product.basePrice = parseFloat(value.replace(/ /g, '').replace(',', '.'));
+        default:
+            console.log('label not in switch: ' + field.label)
             break;
     }
+
 }

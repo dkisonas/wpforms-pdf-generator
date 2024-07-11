@@ -51,9 +51,8 @@ function generate_pdf(): void
 
         log_message('Data received: ' . json_encode($data));
 
-        $invoiceData = map_data_to_object($data);
-        $amountInWords = convert_number_to_words($invoiceData->finalPrice);
-        $html = generate_html($invoiceData, $amountInWords);
+        $invoiceData = map_data_to_objects($data);
+        $html = generate_html($invoiceData);
 
         create_and_stream_pdf($html);
 

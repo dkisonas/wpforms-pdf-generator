@@ -4,126 +4,52 @@ use classes\InvoiceData;
 use classes\PersonalData;
 use classes\ProductData;
 
-function map_data_to_object($data): InvoiceData
+function map_data_to_objects($data): InvoiceData
 {
     $invoiceData = new InvoiceData();
-    $personalData = new PersonalData();
-
-    foreach ($data as $field) {
-        if ($field['label'] === 'products') {
-            $products = process_product_data($field['value']);
-            $invoiceData->products = $products;
-        } else {
-            process_personal_data($personalData, $field);
-        }
-    }
-
-    $invoiceData->personalData = $personalData;
-
-    $invoiceData->finalPrice = array_reduce($invoiceData->products, function ($sum, $product) {
-        return $sum + $product->totalPrice;
-    }, 0.0);
-
+    $invoiceData->personalData = map_personal_data($data['personalData']);
+    $invoiceData->finalPrice = $data['finalPrice'];
+    $invoiceData->products = map_products($data['products']);
     return $invoiceData;
 }
 
-function process_personal_data(PersonalData $personalData, $field): void
+function map_products(mixed $products): array
 {
-    $value = htmlspecialchars($field['value'], ENT_QUOTES, 'UTF-8');
-
-    switch ($field['label']) {
-        case 'Įmonės pavadinimas':
-            $personalData->companyName = $value;
-            break;
-        case 'Įmonės kodas':
-            $personalData->companyCode = $value;
-            break;
-        case 'PVM kodas':
-            $personalData->pvmCode = $value;
-            break;
-        case 'Mobilusis':
-            $personalData->mobile = $value;
-            break;
-        case 'Adresas':
-            $personalData->address = $value;
-            break;
-        case 'El.Pašto adresas':
-            $personalData->email = $value;
-            break;
-        case 'Vardas ir Pavardė':
-            $personalData->name = $value;
-            break;
+    $mappedProducts = [];
+    foreach ($products as $product) {
+        $mappedProduct = new ProductData();
+        $mappedProduct->category = $product['category'];
+        $mappedProduct->glassPackageType = $product['glassPackageType'];
+        $mappedProduct->narrowGlazing = $product['narrowGlazing'];
+        $mappedProduct->height = $product['height'];
+        $mappedProduct->width = $product['width'];
+        $mappedProduct->frame = $product['frame'];
+        $mappedProduct->transport = $product['transport'];
+        $mappedProduct->glassImitation = $product['glassImitation'];
+        $mappedProduct->oldGlassRemoval = $product['oldGlassRemoval'];
+        $mappedProduct->finalPrice = $product['finalPrice'];
+        $mappedProduct->glassThickness = $product['glassThickness'];
+        $mappedProduct->glassStructure = $product['glassStructure'];
+        $mappedProduct->replacementWork = $product['replacementWork'];
+        $mappedProduct->basePrice = $product['basePrice'];
+        $mappedProduct->quantity = $product['quantity'];
+        $mappedProduct->totalPrice = $product['totalPrice'];
+        $mappedProducts[] = $mappedProduct;
     }
+    return $mappedProducts;
 }
 
-function process_product_data($productsArray): array
+function map_personal_data(mixed $personalData): PersonalData
 {
-    $products = [];
-
-    foreach ($productsArray as $productData) {
-        $product = new ProductData();
-
-        foreach ($productData as $productField) {
-            $value = htmlspecialchars($productField['value'], ENT_QUOTES, 'UTF-8');
-            switch ($productField['label']) {
-                case 'Pasirinkite kategoriją':
-                    $product->category = $value;
-                    break;
-                case 'Pasirinkite stiklo paketo tipą':
-                    $product->glassPackageType = $value;
-                    break;
-                case 'Ar reikia siaurinti stiklajuoste?':
-                    $product->narrowGlazing = $value;
-                    break;
-                case 'Stiklo paketo aukštis mm.':
-                    $product->height = $value;
-                    break;
-                case 'Stiklo paketo plotis mm.':
-                    $product->width = $value;
-                    break;
-                case 'Pasirinkti stiklo paketo rėmelį':
-                    $product->frame = $value;
-                    break;
-                case 'Transportavimas':
-                    $product->transport = $value;
-                    break;
-                case 'Imitacijos stiklo pakete':
-                    $product->glassImitation = $value;
-                    break;
-                case 'Seno stiklo paketo išvežimas':
-                    $product->oldGlassRemoval = $value;
-                    break;
-                case 'Galutinė kaina':
-                    $product->finalPrice = (float)str_replace([' ', ','], ['', '.'], $value);
-                    break;
-                case 'Pasirinkite dviejų stiklo paketo storį':
-                case 'Pasirinkite trijų stiklo paketo storį':
-                    $product->glassThickness = $value;
-                    break;
-                case 'Pasirinkite stiklo paketo struktūrą':
-                    $product->glassStructure = $value;
-                    break;
-                case 'Pakeitimo darbai':
-                case 'Pakeitimo darbai klijuotos medienos':
-                case 'Pakeitimo darbai šarvo durys':
-                    $product->replacementWork = $value;
-                    break;
-                case 'Prekės':
-                    $product->description = $value;
-                    break;
-                case 'Kiekis':
-                    $product->quantity = (int)$value;
-                    break;
-                case 'Kaina':
-                    $product->basePrice = (float)str_replace([' ', ','], ['', '.'], $value);
-                    break;
-            }
-        }
-        $product->totalPrice = $product->basePrice * $product->quantity;
-        $products[] = $product;
-    }
-
-    return $products;
+    $mappedPersonalData = new PersonalData();
+    $mappedPersonalData->companyName = $personalData['companyName'];
+    $mappedPersonalData->companyCode = $personalData['companyCode'];
+    $mappedPersonalData->pvmCode = $personalData['pvmCode'];
+    $mappedPersonalData->mobile = $personalData['mobile'];
+    $mappedPersonalData->address = $personalData['address'];
+    $mappedPersonalData->email = $personalData['email'];
+    $mappedPersonalData->name = $personalData['name'];
+    return $mappedPersonalData;
 }
 
 function get_next_invoice_number(): string

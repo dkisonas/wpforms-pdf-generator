@@ -21,7 +21,6 @@ export class ProductData {
         this.transport = '';
         this.glassImitation = '';
         this.oldGlassRemoval = '';
-        this.finalPrice = 0.0;
         this.glassThickness = '';
         this.glassStructure = '';
         this.replacementWork = '';

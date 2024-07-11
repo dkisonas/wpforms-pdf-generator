@@ -1,5 +1,6 @@
 <?php
 
+use classes\InvoiceData;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use NumberToWords\NumberToWords;
@@ -24,10 +25,11 @@ function convert_number_to_words($number): string
     return $currencyTransformer->toWords((float)$number, 'EUR');
 }
 
-function generate_html($invoiceData, $amountInWords): bool|string
+function generate_html(InvoiceData $invoiceData): bool|string
 {
     $invoice_number = get_next_invoice_number();
     $today_date = get_today_date_formatted();
+    $amountInWords = convert_number_to_words($invoiceData->finalPrice);
 
     ob_start();
     ?>

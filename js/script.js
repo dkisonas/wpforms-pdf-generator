@@ -25,7 +25,6 @@ function handleButtonClick(event) {
         event.preventDefault();
         const productData = collectStructuredFormData('product');
         saveProductDataToLocalStorage(productData);
-        console.log('saved product data:', JSON.parse(localStorage.getItem('productData')) || [])
         clearForm();
     } else if (target && target.classList.contains('wpforms-submit') && !allowFormSubmit) {
         event.preventDefault();
@@ -33,9 +32,10 @@ function handleButtonClick(event) {
         saveProductDataToLocalStorage(productData);
         const personalData = JSON.parse(localStorage.getItem('personalData')) || [];
         const allData = { personalData, products: JSON.parse(localStorage.getItem('productData')) || [] };
+        console.log(allData)
         const invoiceData = mapDataToInvoice(allData);
         console.log('invoiceData:', invoiceData);
-        // sendFormDataToServer(allData, event);
+        sendFormDataToServer(allData, event);
     }
 }
 
