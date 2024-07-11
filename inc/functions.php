@@ -79,9 +79,11 @@ function convert_number_to_words($number): string
 
 function log_message($message): void
 {
-    $log_file = plugin_dir_path(__FILE__) . 'pdf_generation.log';
-    $timestamp = date("Y-m-d H:i:s");
-    file_put_contents($log_file, "[$timestamp] $message" . PHP_EOL, FILE_APPEND);
+    if (WP_DEBUG_LOG) {
+        $log_file = WP_CONTENT_DIR . '/debug.log';
+        $timestamp = date("Y-m-d H:i:s");
+        file_put_contents($log_file, "[$timestamp] $message" . PHP_EOL, FILE_APPEND);
+    }
 }
 
 function upload_pdf_to_wordpress(?string $output): string
