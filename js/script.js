@@ -136,7 +136,7 @@ function filterDataByType(data, type) {
 }
 
 function sendFormDataToServer(data, event) {
-    fetch(customNumberToWords.generatePdfUrl, {
+    fetch(window.customNumberToWords.generatePdfUrl, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

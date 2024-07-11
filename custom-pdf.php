@@ -83,8 +83,13 @@ function enqueue_custom_assets()
         array('@my-plugin/mapper', '@my-plugin/classes')
     );
 
-    // Localize script for ajax URL
-    wp_localize_script('@my-plugin/script', 'customNumberToWords', array(
-        'generatePdfUrl' => admin_url('admin-post.php?action=generate_pdf')
-    ));
+    add_action('wp_footer', function() {
+        ?>
+        <script type="text/javascript">
+            window.customNumberToWords = {
+                generatePdfUrl: '<?php echo admin_url('admin-post.php?action=generate_pdf'); ?>'
+            };
+        </script>
+        <?php
+    });
 }

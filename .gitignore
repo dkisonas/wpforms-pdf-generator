@@ -7,9 +7,6 @@
 # Ignore IDE specific files
 .idea/
 
-# Ignore composer lock file (if you prefer to exclude it)
-/composer.lock
-
 # Ignore all hidden files except .gitignore
 .*
 !.gitignore
