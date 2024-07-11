@@ -62,10 +62,27 @@ function generate_pdf(): void
     }
 }
 
-// Enqueue custom CSS and JavaScript
-function enqueue_custom_assets(): void
-{
-    wp_enqueue_script('custom-number-to-words-script', plugin_dir_url(__FILE__) . 'js/script.js', array(), filemtime(plugin_dir_path(__FILE__) . 'js/script.js'), true);
+function enqueue_custom_assets() {
+    // Register the modules
+    wp_register_script_module(
+        '@my-plugin/classes',
+        plugin_dir_url(__FILE__) . 'js/classes.js'
+    );
+
+    wp_register_script_module(
+        '@my-plugin/mapper',
+        plugin_dir_url(__FILE__) . 'js/mapper.js',
+        array('@my-plugin/classes')
+    );
+
+    // Register and enqueue the main script module
+    wp_enqueue_script_module(
+        '@my-plugin/script',
+        plugin_dir_url(__FILE__) . 'js/script.js',
+        array('@my-plugin/mapper', '@my-plugin/classes')
+    );
+
+    // Localize script for ajax URL
     wp_localize_script('custom-number-to-words-script', 'customNumberToWords', array(
         'generatePdfUrl' => admin_url('admin-post.php?action=generate_pdf')
     ));
