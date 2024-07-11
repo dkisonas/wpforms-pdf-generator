@@ -11,6 +11,8 @@ require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
 
 // Include necessary files
 require_once plugin_dir_path(__FILE__) . 'classes/InvoiceData.php';
+require_once plugin_dir_path(__FILE__) . 'classes/ProductData.php';
+require_once plugin_dir_path(__FILE__) . 'classes/PersonalData.php';
 require_once plugin_dir_path(__FILE__) . 'inc/functions.php';
 require_once plugin_dir_path(__FILE__) . 'inc/pdf-generation.php';
 
@@ -29,23 +31,35 @@ function initialize_invoice_number() {
 }
 add_action('init', 'initialize_invoice_number');
 
+// Enable error reporting
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 // Main function to generate PDF
 function generate_pdf(): void
 {
-    $data = json_decode(file_get_contents('php://input'), true);
+    try {
+        log_message('generate_pdf called');
 
-    if (!$data) {
-        echo 'No data received';
-        return;
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        if (!$data) {
+            log_message('No data received');
+            echo 'No data received';
+            return;
+        }
+
+        log_message('Data received: ' . json_encode($data));
+
+        $invoiceData = map_data_to_object($data);
+        $amountInWords = convert_number_to_words($invoiceData->finalPrice);
+        $html = generate_html($invoiceData, $amountInWords);
+
+        create_and_stream_pdf($html);
+
+    } catch (Exception $e) {
+        log_message('Exception: ' . $e->getMessage());
     }
-
-    $filteredData = filter_and_map_data($data);
-    $invoiceData = map_data_to_object($filteredData);
-    $finalPrice = extract_final_price($filteredData);
-    $amountInWords = convert_number_to_words($finalPrice);
-    $html = generate_html($invoiceData, $amountInWords);
-
-    create_and_stream_pdf($html);
 }
 
 // Enqueue custom CSS and JavaScript

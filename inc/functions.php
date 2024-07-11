@@ -1,135 +1,149 @@
 <?php
 
 use classes\InvoiceData;
-
-function get_base64_image($file_path): string
-{
-    if (file_exists($file_path)) {
-        $image_data = file_get_contents($file_path);
-        $base64 = base64_encode($image_data);
-        return 'data:image/jpeg;base64,' . $base64;
-    }
-    return '';
-}
-
-function extract_final_price($data): float
-{
-    foreach ($data as $item) {
-        if ($item['label'] === 'Galutinė kaina') {
-            $price = str_replace([' ', ','], ['', '.'], $item['value']);
-            return (float)$price * 100;
-        }
-    }
-    return 0.0;
-}
-
-function filter_and_map_data($data): array
-{
-    $excludedLabels = ['Layout'];
-    $labelMappings = [
-        'Original Label' => 'Mapped Label'
-        // Add more mappings as needed
-    ];
-
-    // Remove duplicates and filter out '*'
-    $filteredData = [];
-    $seenLabels = [];
-
-    foreach ($data as $item) {
-        if (empty($item['label']) || empty($item['value']) || in_array($item['label'], $excludedLabels)) {
-            continue;
-        }
-        $item['label'] = str_replace('*', '', $item['label']);
-
-        // Map labels
-        $item['label'] = $labelMappings[$item['label']] ?? $item['label'];
-
-        // Remove duplicates
-        $uniqueKey = $item['label'] . '|' . $item['value'];
-        if (!isset($seenLabels[$uniqueKey])) {
-            $filteredData[] = $item;
-            $seenLabels[$uniqueKey] = count($filteredData) - 1;
-        }
-    }
-
-    return $filteredData;
-}
+use classes\PersonalData;
+use classes\ProductData;
 
 function map_data_to_object($data): InvoiceData
 {
     $invoiceData = new InvoiceData();
+    $personalData = new PersonalData();
 
     foreach ($data as $field) {
-        switch ($field['label']) {
-            case 'Įmonės pavadinimas':
-                $invoiceData->companyName = htmlspecialchars($field['value'], ENT_QUOTES, 'UTF-8');
-                break;
-            case 'Įmonės kodas':
-                $invoiceData->companyCode = htmlspecialchars($field['value'], ENT_QUOTES, 'UTF-8');
-                break;
-            case 'PVM kodas':
-                $invoiceData->pvmCode = htmlspecialchars($field['value'], ENT_QUOTES, 'UTF-8');
-                break;
-            case 'Mobilusis':
-                $invoiceData->mobile = htmlspecialchars($field['value'], ENT_QUOTES, 'UTF-8');
-                break;
-            case 'Adresas':
-                $invoiceData->address = htmlspecialchars($field['value'], ENT_QUOTES, 'UTF-8');
-                break;
-            case 'El.Pašto adresas':
-                $invoiceData->email = htmlspecialchars($field['value'], ENT_QUOTES, 'UTF-8');
-                break;
-            case 'Pasirinkite kategoriją':
-                $invoiceData->category = htmlspecialchars($field['value'], ENT_QUOTES, 'UTF-8');
-                break;
-            case 'Pasirinkite stiklo paketo tipą':
-                $invoiceData->glassPackageType = htmlspecialchars($field['value'], ENT_QUOTES, 'UTF-8');
-                break;
-            case 'Pasirinkite trijų stiklo paketo storį':
-                $invoiceData->glassPackageThickness = htmlspecialchars($field['value'], ENT_QUOTES, 'UTF-8');
-                break;
-            case 'Pasirinkite stiklo paketo struktūrą 38mm':
-                $invoiceData->glassPackageStructure = htmlspecialchars($field['value'], ENT_QUOTES, 'UTF-8');
-                break;
-            case 'Stiklo paketo aukštis mm.':
-                $invoiceData->height = htmlspecialchars($field['value'], ENT_QUOTES, 'UTF-8');
-                break;
-            case 'Stiklo paketo plotis mm.':
-                $invoiceData->width = htmlspecialchars($field['value'], ENT_QUOTES, 'UTF-8');
-                break;
-            case 'Pasirinkti stiklo paketo rėmeli':
-                $invoiceData->frameType = htmlspecialchars($field['value'], ENT_QUOTES, 'UTF-8');
-                break;
-            case 'Transportavimas':
-                $invoiceData->transport = htmlspecialchars($field['value'], ENT_QUOTES, 'UTF-8');
-                break;
-            case 'Imitacijos stiklo pakete':
-                $invoiceData->glassImitation = htmlspecialchars($field['value'], ENT_QUOTES, 'UTF-8');
-                break;
-            case 'Seno stiklo paketo išvežimas':
-                $invoiceData->oldGlassRemoval = htmlspecialchars($field['value'], ENT_QUOTES, 'UTF-8');
-                break;
-            case 'Pakeitimo darbai šarvo durys':
-                $invoiceData->replacementWork = htmlspecialchars($field['value'], ENT_QUOTES, 'UTF-8');
-                break;
-            case 'Galutinė kaina':
-                $invoiceData->finalPrice = htmlspecialchars($field['value'], ENT_QUOTES, 'UTF-8');
-                break;
+        if ($field['label'] === 'products') {
+            $products = process_product_data($field['value']);
+            $invoiceData->products = $products;
+        } else {
+            process_personal_data($personalData, $field);
         }
     }
+
+    $invoiceData->personalData = $personalData;
+
+    $invoiceData->finalPrice = array_reduce($invoiceData->products, function ($sum, $product) {
+        return $sum + $product->totalPrice;
+    }, 0.0);
 
     return $invoiceData;
 }
 
-function get_next_invoice_number() {
+function process_personal_data(PersonalData $personalData, $field): void
+{
+    $value = htmlspecialchars($field['value'], ENT_QUOTES, 'UTF-8');
+
+    switch ($field['label']) {
+        case 'Įmonės pavadinimas':
+            $personalData->companyName = $value;
+            break;
+        case 'Įmonės kodas':
+            $personalData->companyCode = $value;
+            break;
+        case 'PVM kodas':
+            $personalData->pvmCode = $value;
+            break;
+        case 'Mobilusis':
+            $personalData->mobile = $value;
+            break;
+        case 'Adresas':
+            $personalData->address = $value;
+            break;
+        case 'El.Pašto adresas':
+            $personalData->email = $value;
+            break;
+        case 'Vardas ir Pavardė':
+            $personalData->name = $value;
+            break;
+    }
+}
+
+function process_product_data($productsArray): array
+{
+    $products = [];
+
+    foreach ($productsArray as $productData) {
+        $product = new ProductData();
+
+        foreach ($productData as $productField) {
+            $value = htmlspecialchars($productField['value'], ENT_QUOTES, 'UTF-8');
+            switch ($productField['label']) {
+                case 'Pasirinkite kategoriją':
+                    $product->category = $value;
+                    break;
+                case 'Pasirinkite stiklo paketo tipą':
+                    $product->glassPackageType = $value;
+                    break;
+                case 'Ar reikia siaurinti stiklajuoste?':
+                    $product->narrowGlazing = $value;
+                    break;
+                case 'Stiklo paketo aukštis mm.':
+                    $product->height = $value;
+                    break;
+                case 'Stiklo paketo plotis mm.':
+                    $product->width = $value;
+                    break;
+                case 'Pasirinkti stiklo paketo rėmelį':
+                    $product->frame = $value;
+                    break;
+                case 'Transportavimas':
+                    $product->transport = $value;
+                    break;
+                case 'Imitacijos stiklo pakete':
+                    $product->glassImitation = $value;
+                    break;
+                case 'Seno stiklo paketo išvežimas':
+                    $product->oldGlassRemoval = $value;
+                    break;
+                case 'Galutinė kaina':
+                    $product->finalPrice = (float)str_replace([' ', ','], ['', '.'], $value);
+                    break;
+                case 'Pasirinkite dviejų stiklo paketo storį':
+                case 'Pasirinkite trijų stiklo paketo storį':
+                    $product->glassThickness = $value;
+                    break;
+                case 'Pasirinkite stiklo paketo struktūrą':
+                    $product->glassStructure = $value;
+                    break;
+                case 'Pakeitimo darbai':
+                case 'Pakeitimo darbai klijuotos medienos':
+                case 'Pakeitimo darbai šarvo durys':
+                    $product->replacementWork = $value;
+                    break;
+                case 'Prekės':
+                    $product->description = $value;
+                    break;
+                case 'Kiekis':
+                    $product->quantity = (int)$value;
+                    break;
+                case 'Kaina':
+                    $product->basePrice = (float)str_replace([' ', ','], ['', '.'], $value);
+                    break;
+            }
+        }
+        $product->totalPrice = $product->basePrice * $product->quantity;
+        $products[] = $product;
+    }
+
+    return $products;
+}
+
+function get_next_invoice_number(): string
+{
     $invoice_number = get_option('next_invoice_number', 1); // Get the current invoice number from the database, default to 1 if not set
     update_option('next_invoice_number', $invoice_number + 1); // Increment the invoice number and save it back to the database
     return str_pad($invoice_number, 5, '0', STR_PAD_LEFT); // Pad the number with zeros to make it 5 digits
 }
 
-function get_today_date_formatted() {
+function get_today_date_formatted(): string
+{
     $year = date('Y');
     $month = date('m');
     $day = date('d');
     return "Metai: $year Mėnuo: $month d.: $day";
+}
+
+function log_message($message)
+{
+    $log_file = plugin_dir_path(__FILE__) . 'pdf_generation.log';
+    $timestamp = date("Y-m-d H:i:s");
+    file_put_contents($log_file, "[$timestamp] $message" . PHP_EOL, FILE_APPEND);
 }

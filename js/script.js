@@ -1,6 +1,11 @@
+let allowFormSubmit = false;
+const FORM_ID = 'wpforms-form-13'
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded and parsed');
     initializeButtonListeners();
+    resetLocalStorage();
+    console.log('Button listeners initialized and local storage reset');
 });
 
 function initializeButtonListeners() {
@@ -9,49 +14,125 @@ function initializeButtonListeners() {
 }
 
 function handleButtonClick(event) {
-    console.log('Button clicked:', event.target);
-    if (event.target && event.target.classList.contains('wpforms-page-next')) {
-        console.log('Next page button clicked');
-        setTimeout(addGeneratePDFButton, 100);
-    } else if (event.target && event.target.id === 'button-generate-pdf') {
+    const target = event.target;
+
+    if (target && target.classList.contains('wpforms-page-next')) {
+        setTimeout(addGenerateProductButton, 100);
+    } else if (target && target.id === 'button-add-product') {
         event.preventDefault();
-        console.log('Generate PDF button clicked');
-        const structuredData = collectStructuredFormData();
-        console.log('Collected Structured Data:', structuredData);
-        sendFormDataToServer(structuredData);
+        console.log('Add Product button clicked');
+        const productData = collectStructuredFormData('product');
+        console.log('Collected Product Data:', productData);
+        saveProductDataToLocalStorage(productData);
+        clearForm();
+    } else if (target && target.classList.contains('wpforms-submit') && !allowFormSubmit) {
+        event.preventDefault();
+        console.log('Submit button clicked');
+        const productData = collectStructuredFormData('product');
+        console.log('Collected Product Data on Submit:', productData);
+        saveProductDataToLocalStorage(productData);
+        const personalData = collectStructuredFormData('personal');
+        console.log('Collected Personal Data:', personalData);
+        const allData = { personalData, products: JSON.parse(localStorage.getItem('productData')) || [] };
+        console.log('All Data to be Sent:', allData);
+        // sendFormDataToServer(allData, event);
     }
 }
 
-function addGeneratePDFButton() {
-    console.log('Attempting to add Generate PDF button');
-    const submitContainers = document.getElementsByClassName('wpforms-submit-container');
-    if (submitContainers.length > 0) {
-        const submitContainer = submitContainers[0];
-        if (!document.getElementById('button-generate-pdf')) {
-            const customButton = createGeneratePDFButton();
-            const submitButton = submitContainer.querySelector('.wpforms-submit');
-            submitContainer.insertBefore(customButton, submitButton);
-            console.log('Generate PDF button added');
-        }
-    } else {
-        console.log('No submit container found');
+function addGenerateProductButton() {
+    const submitContainer = document.querySelector('.wpforms-submit-container');
+    if (submitContainer && !document.getElementById('button-add-product')) {
+        const customButton = createButton('button-add-product', 'Išsaugoti ir pridėti kitą produktą');
+        const submitButton = submitContainer.querySelector('.wpforms-submit');
+        submitContainer.insertBefore(customButton, submitButton);
+        console.log('Generate Product button added');
     }
 }
 
-function createGeneratePDFButton() {
-    console.log('Creating Generate PDF button');
+function createButton(id, text) {
     const button = document.createElement('button');
     button.type = 'submit';
-    button.id = 'button-generate-pdf';
-    button.className = 'wpforms-submit button-generate-pdf';
-    button.innerHTML = 'Generate PDF';
-    button.setAttribute('data-alt-text', 'Generating...');
-    button.setAttribute('data-submit-text', 'Generate PDF');
-    button.setAttribute('aria-live', 'assertive');
+    button.id = id;
+    button.className = 'wpforms-submit';
+    button.innerHTML = text;
     return button;
 }
 
-function sendFormDataToServer(data) {
+function resetLocalStorage() {
+    localStorage.setItem('productData', JSON.stringify([]));
+    console.log('Local storage reset');
+}
+
+function saveProductDataToLocalStorage(productData) {
+    const storedData = JSON.parse(localStorage.getItem('productData')) || [];
+    storedData.push(productData);
+    localStorage.setItem('productData', JSON.stringify(storedData));
+    console.log('Product data saved to local storage:', storedData);
+}
+
+function collectStructuredFormData(type) {
+    const form = document.getElementById(FORM_ID);
+    if (!form) {
+        console.error('Form not found');
+        return [];
+    }
+
+    const structuredData = [];
+
+    form.querySelectorAll('.wpforms-field').forEach(fieldContainer => {
+        const label = fieldContainer.querySelector('label, legend')?.textContent.trim().replace('*', '').trim();
+        if (!label) return;
+
+        const inputs = fieldContainer.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            let value = '';
+
+            if (input.type === 'checkbox' || input.type === 'radio') {
+                if (input.checked) value = input.nextElementSibling?.textContent.trim();
+            } else if (input.tagName === 'SELECT') {
+                const selectedOption = input.options[input.selectedIndex];
+                value = selectedOption ? selectedOption.textContent.trim() : '';
+            } else {
+                value = input.value.trim();
+            }
+
+            if (value) {
+                structuredData.push({ label, value });
+            }
+        });
+    });
+
+    return filterDataByType(structuredData, type);
+}
+
+function filterDataByType(data, type) {
+    const personalFields = [
+        'Įmonės pavadinimas', 'Įmonės kodas', 'PVM kodas', 'Mobilusis',
+        'Adresas', 'El.Pašto adresas', 'Vardas ir Pavardė', 'Pašto', 'Vardas'
+    ];
+
+    const productFields = [
+        'Pasirinkite kategoriją', 'Pasirinkite stiklo paketo tipą', 'Ar reikia siaurinti stiklajuoste?',
+        'Stiklo paketo aukštis mm.', 'Stiklo paketo plotis mm.', 'Pasirinkti stiklo paketo rėmelį',
+        'Transportavimas', 'Imitacijos stiklo pakete', 'Seno stiklo paketo išvežimas',
+        'Galutinė kaina', 'Pasirinkite dviejų stiklo paketo storį', 'Pasirinkite trijų stiklo paketo storį',
+        'Pasirinkite stiklo paketo struktūrą', 'Pakeitimo darbai', 'Pakeitimo darbai klijuotos medienos',
+        'Pakeitimo darbai šarvo durys'
+    ];
+
+    const isFieldIncluded = (fieldList, label) => fieldList.some(field => label.includes(field));
+
+    return data.filter(item => {
+        if (type === 'personal') {
+            return isFieldIncluded(personalFields, item.label);
+        } else if (type === 'product') {
+            return isFieldIncluded(productFields, item.label);
+        }
+        return false;
+    });
+}
+
+function sendFormDataToServer(data, event) {
     console.log('Sending form data to server:', data);
     fetch(customNumberToWords.generatePdfUrl, {
         method: 'POST',
@@ -60,9 +141,13 @@ function sendFormDataToServer(data) {
         },
         body: JSON.stringify(data)
     })
-        .then(response => response.blob())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.blob();
+        })
         .then(blob => {
-            console.log('Server response received, creating PDF download link');
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.style.display = 'none';
@@ -71,91 +156,20 @@ function sendFormDataToServer(data) {
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
+            allowFormSubmit = true;
+            resetLocalStorage();
+            event.target.click();
+            console.log('PDF generated and downloaded');
         })
         .catch(error => console.error('Error generating PDF:', error));
 }
 
-function collectStructuredFormData() {
-    const form = document.getElementById('wpforms-form-1825');
-    if (!form) {
+function clearForm() {
+    const form = document.getElementById(FORM_ID);
+    if (form) {
+        form.reset();
+        console.log('Form cleared');
+    } else {
         console.error('Form not found');
-        return [];
-    }
-    console.log('Collecting structured form data');
-    const formData = new FormData(form);
-    const structuredData = [];
-    const labelCounts = {};
-
-    form.querySelectorAll('.wpforms-field').forEach(fieldContainer => {
-        const fieldset = fieldContainer.querySelector('fieldset');
-        if (fieldset) {
-            console.log('Processing fieldset:', fieldset);
-            collectFieldsetData(fieldset, formData, structuredData, labelCounts);
-        } else {
-            console.log('Processing field container:', fieldContainer);
-            collectFieldData(fieldContainer, formData, structuredData, labelCounts);
-        }
-    });
-
-    const filteredData = structuredData.filter(item => item.value !== '');
-    console.log('Filtered Structured Data:', filteredData);
-    return filteredData;
-}
-
-function collectFieldsetData(fieldset, formData, structuredData, labelCounts) {
-    const legend = fieldset.querySelector('legend')?.textContent.trim();
-    console.log('Collecting data for fieldset with legend:', legend);
-    const inputs = fieldset.querySelectorAll('input, select, textarea');
-
-    inputs.forEach(input => {
-        console.log('Processing input in fieldset:', input);
-        processInput(input, legend, formData, structuredData, labelCounts);
-    });
-}
-
-function collectFieldData(fieldContainer, formData, structuredData, labelCounts) {
-    const label = fieldContainer.querySelector('label')?.textContent.trim();
-    console.log('Collecting data for field container with label:', label);
-    const inputs = fieldContainer.querySelectorAll('input, select, textarea');
-
-    inputs.forEach(input => {
-        console.log('Processing input in field container:', input);
-        processInput(input, label, formData, structuredData, labelCounts);
-    });
-}
-
-function processInput(input, label, formData, structuredData, labelCounts) {
-    console.log('Processing input:', input, 'with label:', label);
-    if (!labelCounts[label]) {
-        labelCounts[label] = 0;
-    }
-
-    if (labelCounts[label] >= 1) {
-        console.log('Skipping input due to duplicate label:', label);
-        return;
-    }
-
-    if (input.type === 'radio' || input.type === 'checkbox') {
-        if (input.checked) {
-            const choiceLabel = input.closest('fieldset').querySelector(`label[for="${input.id}"]`)?.textContent.trim();
-            structuredData.push({ label: label, value: choiceLabel || input.value });
-            labelCounts[label]++;
-            console.log('Added radio/checkbox input:', choiceLabel || input.value);
-        }
-    } else if (input.tagName === 'SELECT') {
-        const selectedOption = input.options[input.selectedIndex];
-        const selectedOptionText = selectedOption ? selectedOption.textContent.trim() : '';
-        const quantityInput = document.getElementById(`${input.id}-quantity`);
-        if (quantityInput && quantityInput.value) {
-            structuredData.push({ label: label, value: `${selectedOptionText} (Quantity: ${quantityInput.value})` });
-        } else {
-            structuredData.push({ label: label, value: selectedOptionText });
-        }
-        labelCounts[label]++;
-        console.log('Added select input:', selectedOptionText);
-    } else if (formData.has(input.name)) {
-        structuredData.push({ label: label, value: formData.get(input.name) });
-        labelCounts[label]++;
-        console.log('Added input:', formData.get(input.name));
     }
 }

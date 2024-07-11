@@ -29,16 +29,7 @@ function generate_html($invoiceData, $amountInWords): bool|string
     $invoice_number = get_next_invoice_number();
     $today_date = get_today_date_formatted();
 
-    // Relative paths for the images
-    $logo_path = 'assets/logo.jpeg';
-    $signature_path = 'assets/signature.jpeg';
-
-    // Convert images to base64
-    $logo_base64 = get_base64_image($logo_path);
-    $signature_base64 = get_base64_image($signature_path);
-
     ob_start();
-    // Start of template content
     ?>
     <!DOCTYPE html>
     <html lang="en">
@@ -132,7 +123,6 @@ function generate_html($invoiceData, $amountInWords): bool|string
     <body>
     <div class="container">
         <div class="header">
-            <img src="<?= $logo_base64 ?>" alt="Logo">
             <h2>Išankstinė sąskaita – faktūra</h2>
             <h3>Serija SPI Nr.: <?= $invoice_number ?></h3>
             <h4>Data: <?= $today_date ?></h4>
@@ -186,16 +176,17 @@ function generate_html($invoiceData, $amountInWords): bool|string
                     <th>Kaina</th>
                     <th>Suma</th>
                 </tr>
-                <tr>
-                    <td><?= $invoiceData->glassPackageStructure; ?> - <?= $invoiceData->glassPackageThickness; ?>
-                        mm. <?= $invoiceData->frameType; ?></td>
-                    <td><?= $invoiceData->quantity; ?></td>
-                    <td><?= $invoiceData->finalPrice; ?></td>
-                    <td><?= (float) $invoiceData->finalPrice * $invoiceData->quantity; ?> €</td>
-                </tr>
+                <?php foreach ($invoiceData->products as $product) { ?>
+                    <tr>
+                        <td><?= $product->description ?></td>
+                        <td><?= $product->quantity ?></td>
+                        <td><?= $product->basePrice ?> €</td>
+                        <td><?= $product->totalPrice ?> €</td>
+                    </tr>
+                <?php } ?>
                 <tr>
                     <td colspan="3" style="text-align:right;">Viso suma :</td>
-                    <td><?= $invoiceData->finalPrice; ?> €</td>
+                    <td><?= $invoiceData->finalPrice ?> €</td>
                 </tr>
             </table>
         </div>
@@ -205,7 +196,6 @@ function generate_html($invoiceData, $amountInWords): bool|string
             <div class="sig-col">
                 <p>Pardavėjas :</p>
                 <p>Direktorius Gytis Sereika</p>
-                <img src="<?= $signature_base64 ?>" alt="Signature">
                 <p>AV</p>
             </div>
             <div class="sig-col">
@@ -216,8 +206,6 @@ function generate_html($invoiceData, $amountInWords): bool|string
     </body>
     </html>
     <?php
-    // End of template content
     $html = ob_get_clean();
-
     return $html;
 }
