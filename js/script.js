@@ -1,15 +1,15 @@
+import { mapDataToInvoice } from './mapper.js';
+
+
 let allowFormSubmit = false;
-const FORM_ID = 'wpforms-form-13'
+const FORM_ID = 'wpforms-form-13';
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM fully loaded and parsed');
     initializeButtonListeners();
     resetLocalStorage();
-    console.log('Button listeners initialized and local storage reset');
 });
 
 function initializeButtonListeners() {
-    console.log('Initializing button listeners');
     document.addEventListener('click', handleButtonClick);
 }
 
@@ -17,24 +17,24 @@ function handleButtonClick(event) {
     const target = event.target;
 
     if (target && target.classList.contains('wpforms-page-next')) {
+        savePersonalDataToLocalStorage();
+        console.log('saved personal data:', JSON.parse(localStorage.getItem('personalData')) || [])
+
         setTimeout(addGenerateProductButton, 100);
     } else if (target && target.id === 'button-add-product') {
         event.preventDefault();
-        console.log('Add Product button clicked');
         const productData = collectStructuredFormData('product');
-        console.log('Collected Product Data:', productData);
         saveProductDataToLocalStorage(productData);
+        console.log('saved product data:', JSON.parse(localStorage.getItem('productData')) || [])
         clearForm();
     } else if (target && target.classList.contains('wpforms-submit') && !allowFormSubmit) {
         event.preventDefault();
-        console.log('Submit button clicked');
         const productData = collectStructuredFormData('product');
-        console.log('Collected Product Data on Submit:', productData);
         saveProductDataToLocalStorage(productData);
-        const personalData = collectStructuredFormData('personal');
-        console.log('Collected Personal Data:', personalData);
+        const personalData = JSON.parse(localStorage.getItem('personalData')) || [];
         const allData = { personalData, products: JSON.parse(localStorage.getItem('productData')) || [] };
-        console.log('All Data to be Sent:', allData);
+        const invoiceData = mapDataToInvoice(allData);
+        console.log('invoiceData:', invoiceData);
         // sendFormDataToServer(allData, event);
     }
 }
@@ -45,7 +45,6 @@ function addGenerateProductButton() {
         const customButton = createButton('button-add-product', 'Išsaugoti ir pridėti kitą produktą');
         const submitButton = submitContainer.querySelector('.wpforms-submit');
         submitContainer.insertBefore(customButton, submitButton);
-        console.log('Generate Product button added');
     }
 }
 
@@ -60,14 +59,18 @@ function createButton(id, text) {
 
 function resetLocalStorage() {
     localStorage.setItem('productData', JSON.stringify([]));
-    console.log('Local storage reset');
+    localStorage.setItem('personalData', JSON.stringify([]));
 }
 
 function saveProductDataToLocalStorage(productData) {
     const storedData = JSON.parse(localStorage.getItem('productData')) || [];
     storedData.push(productData);
     localStorage.setItem('productData', JSON.stringify(storedData));
-    console.log('Product data saved to local storage:', storedData);
+}
+
+function savePersonalDataToLocalStorage() {
+    const personalData = collectStructuredFormData('personal');
+    localStorage.setItem('personalData', JSON.stringify(personalData));
 }
 
 function collectStructuredFormData(type) {
@@ -133,7 +136,6 @@ function filterDataByType(data, type) {
 }
 
 function sendFormDataToServer(data, event) {
-    console.log('Sending form data to server:', data);
     fetch(customNumberToWords.generatePdfUrl, {
         method: 'POST',
         headers: {
@@ -159,7 +161,6 @@ function sendFormDataToServer(data, event) {
             allowFormSubmit = true;
             resetLocalStorage();
             event.target.click();
-            console.log('PDF generated and downloaded');
         })
         .catch(error => console.error('Error generating PDF:', error));
 }
@@ -168,7 +169,6 @@ function clearForm() {
     const form = document.getElementById(FORM_ID);
     if (form) {
         form.reset();
-        console.log('Form cleared');
     } else {
         console.error('Form not found');
     }
