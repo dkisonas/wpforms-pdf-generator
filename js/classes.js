@@ -14,16 +14,16 @@ export class ProductData {
     constructor() {
         this.category = '';
         this.glassPackageType = '';
-        this.narrowGlazing = '';
+        this.isNarrowGlazingNeeded = false;
         this.height = '';
         this.width = '';
-        this.frame = '';
-        this.transport = '';
-        this.glassImitation = '';
-        this.oldGlassRemoval = '';
+        this.frameType = '';
+        this.isTransportNeeded = false;
+        this.hasGlassImitation = false;
+        this.isOldGlassRemovalNeeded = false;
         this.glassThickness = '';
         this.glassStructure = '';
-        this.replacementWork = '';
+        this.isReplacementWorkNeeded = false;
         this.basePrice = 0.0;
         this.quantity = 0;
         this.totalPrice = 0.0;

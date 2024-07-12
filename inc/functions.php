@@ -21,17 +21,17 @@ function map_products(array $products): array
         $mappedProduct = new ProductData();
         $mappedProduct->category = $product['category'] ?? '';
         $mappedProduct->glassPackageType = $product['glassPackageType'] ?? '';
-        $mappedProduct->narrowGlazing = $product['narrowGlazing'] ?? '';
+        $mappedProduct->isNarrowGlazingNeeded = $product['isNarrowGlazingNeeded'] ?? '';
         $mappedProduct->height = $product['height'] ?? '';
         $mappedProduct->width = $product['width'] ?? '';
-        $mappedProduct->frame = $product['frame'] ?? '';
-        $mappedProduct->transport = $product['transport'] ?? '';
-        $mappedProduct->glassImitation = $product['glassImitation'] ?? '';
-        $mappedProduct->oldGlassRemoval = $product['oldGlassRemoval'] ?? '';
+        $mappedProduct->frameType = $product['frameType'] ?? '';
+        $mappedProduct->isTransportNeeded = $product['isTransportNeeded'] ?? '';
+        $mappedProduct->hasGlassImitation = $product['hasGlassImitation'] ?? '';
+        $mappedProduct->isOldGlassRemovalNeeded = $product['isOldGlassRemovalNeeded'] ?? '';
         $mappedProduct->finalPrice = $product['finalPrice'] ?? 0.0;
         $mappedProduct->glassThickness = $product['glassThickness'] ?? '';
         $mappedProduct->glassStructure = $product['glassStructure'] ?? '';
-        $mappedProduct->replacementWork = $product['replacementWork'] ?? '';
+        $mappedProduct->isReplacementWorkNeeded = $product['isReplacementWorkNeeded'] ?? '';
         $mappedProduct->basePrice = $product['basePrice'] ?? 0.0;
         $mappedProduct->quantity = $product['quantity'] ?? 0;
         $mappedProduct->totalPrice = $product['totalPrice'] ?? 0.0;
@@ -102,5 +102,5 @@ function get_company_name(): string
 
 function get_company_email(): string
 {
-    return "stiklopaketai24@gmail.com";
+    return "domkisonas@gmail.com";
 }

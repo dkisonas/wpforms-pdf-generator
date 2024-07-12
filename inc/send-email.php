@@ -1,14 +1,24 @@
 <?php
 
-
-function send_email_with_attachment($to, $attachment_path): void
-{
-    log_message("trying to send email to: " . $to);
+function send_email_to_user($to, $attachment_path): void {
     $company_name = get_company_name();
+    $subject = $company_name . ' sąskaita-faktūra';
+    $body = $company_name . ' sąskaita-faktūra';
+    send_email_with_attachment($to, $subject, $body, $attachment_path);
+}
 
-
+function send_email_to_admin($attachment_path): void {
+    $company_name = get_company_name();
     $subject = 'Naujai pateikta užklausa ' . $company_name;
     $body = 'Naujai pateikta užklausa ' . $company_name;
+    $to = get_company_email();
+    send_email_with_attachment($to, $subject, $body, $attachment_path);
+}
+
+function send_email_with_attachment($to, $subject, $body, $attachment_path): void
+{
+    log_message("trying to send email to: " . $to);
+
     $headers = array('Content-Type: text/html; charset=UTF-8');
     $attachments = array($attachment_path);
 

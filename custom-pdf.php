@@ -56,9 +56,9 @@ function generate_pdf(): void
 
         log_message('PDF generated and saved to ' . $pdf_path);
 
-        $to = get_company_email();
+        send_email_to_admin($pdf_path);
+        send_email_to_user($invoice_data->personalData->email, $pdf_path);
 
-        send_email_with_attachment($to, $pdf_path);
         unlink($pdf_path);
 
     } catch (Exception $e) {

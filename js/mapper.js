@@ -62,7 +62,6 @@ function mapProductData(product, field) {
     console.log(field)
     if (!value) return
 
-    // Convert 'Reikia' and 'Nereikia' to true and false
     if (value === 'Reikia') value = true;
     if (value === 'Nereikia') value = false;
 
@@ -96,7 +95,7 @@ function mapProductData(product, field) {
             product.hasGlassImitation = value;
             break;
         case fieldLabel.includes('seno stiklo paketo išvežimas'):
-            product.hasOldGlassRemoval = value;
+            product.isOldGlassRemovalNeeded = value;
             break;
         case fieldLabel.includes('dviejų stiklo paketo storį'):
         case fieldLabel.includes('trijų stiklo paketo storį'):

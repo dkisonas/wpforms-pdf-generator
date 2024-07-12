@@ -1,6 +1,5 @@
 import { mapDataToInvoice } from './mapper.js';
 
-
 let allowFormSubmit = false;
 const FORM_ID = 'wpforms-form-1825';
 
@@ -120,7 +119,7 @@ function filterDataByType(data, type) {
         'Transportavimas', 'Imitacijos stiklo pakete', 'Seno stiklo paketo išvežimas',
         'Galutinė kaina', 'Pasirinkite dviejų stiklo paketo storį', 'Pasirinkite trijų stiklo paketo storį',
         'Pasirinkite stiklo paketo struktūrą', 'Pakeitimo darbai', 'Pakeitimo darbai klijuotos medienos',
-        'Pakeitimo darbai šarvo durys'
+        'Pakeitimo darbai šarvo durys', 'Pasirinkti stiklo paketo rėmeli', 'Pasirinkite stiklo paketo rėmelį',
     ];
 
     const isFieldIncluded = (fieldList, label) => fieldList.some(field => label.includes(field));
@@ -142,27 +141,11 @@ function sendFormDataToServer(data, event) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
+    }).then(_ => {
+        allowFormSubmit = true;
+        resetLocalStorage();
+        event.target.click();
     })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.blob();
-        })
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = 'generated_pdf.pdf';
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            allowFormSubmit = true;
-            resetLocalStorage();
-            event.target.click();
-        })
-        .catch(error => console.error('Error generating PDF:', error));
 }
 
 function clearForm() {
