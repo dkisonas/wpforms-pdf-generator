@@ -141,7 +141,21 @@ function sendFormDataToServer(data, event) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
-    }).then(_ => {
+    }).then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.blob();
+        })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'generated_pdf.pdf';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
         allowFormSubmit = true;
         resetLocalStorage();
         event.target.click();

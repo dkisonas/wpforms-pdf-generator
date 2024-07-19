@@ -66,7 +66,7 @@ function get_today_date_formatted(): string
     $year = date('Y');
     $month = date('m');
     $day = date('d');
-    return "Metai: $year Mėnuo: $month $day d.";
+    return "$year-$month-$day";
 }
 
 function convert_number_to_words($number): string
