@@ -2,7 +2,7 @@
 /*
 Plugin Name: WPForms Custom PDF
 Description: WPForms Custom PDF plugin
-Version: 1.4
+Version: 2.0
 Author: Your Name
 */
 

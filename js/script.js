@@ -1,4 +1,4 @@
-import { mapDataToInvoice } from './mapper.js';
+import {mapDataToInvoice} from './mapper.js';
 
 let allowFormSubmit = false;
 const FORM_ID = 'wpforms-form-1825';
@@ -17,8 +17,6 @@ function handleButtonClick(event) {
 
     if (target && target.classList.contains('wpforms-page-next')) {
         savePersonalDataToLocalStorage();
-        console.log('saved personal data:', JSON.parse(localStorage.getItem('personalData')) || [])
-
         setTimeout(addGenerateProductButton, 100);
     } else if (target && target.id === 'button-add-product') {
         event.preventDefault();
@@ -27,13 +25,16 @@ function handleButtonClick(event) {
         clearForm();
     } else if (target && target.classList.contains('wpforms-submit') && !allowFormSubmit) {
         event.preventDefault();
+        const form = getForm();
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
         const productData = collectStructuredFormData('product');
         saveProductDataToLocalStorage(productData);
         const personalData = JSON.parse(localStorage.getItem('personalData')) || [];
-        const allData = { personalData, products: JSON.parse(localStorage.getItem('productData')) || [] };
-        console.log(allData)
+        const allData = {personalData, products: JSON.parse(localStorage.getItem('productData')) || []};
         const invoiceData = mapDataToInvoice(allData);
-        console.log('invoiceData:', invoiceData);
         sendFormDataToServer(invoiceData, event);
     }
 }
@@ -72,8 +73,12 @@ function savePersonalDataToLocalStorage() {
     localStorage.setItem('personalData', JSON.stringify(personalData));
 }
 
+function getForm() {
+    return document.getElementById(FORM_ID);
+}
+
 function collectStructuredFormData(type) {
-    const form = document.getElementById(FORM_ID);
+    const form = getForm();
     if (!form) {
         console.error('Form not found');
         return [];
@@ -99,7 +104,7 @@ function collectStructuredFormData(type) {
             }
 
             if (value) {
-                structuredData.push({ label, value });
+                structuredData.push({label, value});
             }
         });
     });
@@ -149,10 +154,8 @@ function sendFormDataToServer(data, event) {
 }
 
 function clearForm() {
-    const form = document.getElementById(FORM_ID);
+    const form = getForm();
     if (form) {
         form.reset();
-    } else {
-        console.error('Form not found');
     }
 }
