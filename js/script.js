@@ -82,7 +82,6 @@ function getForm() {
 function collectStructuredFormData(type) {
     const form = getForm();
     if (!form) {
-        console.error('Form not found');
         return [];
     }
 

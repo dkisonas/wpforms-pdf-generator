@@ -59,7 +59,6 @@ export function mapPersonalData(personalData, field) {
 function mapProductData(product, field) {
     let value = field.value || null;
 
-    console.log(field)
     if (!value) return
 
     if (value === 'Reikia') value = true;
@@ -120,7 +119,6 @@ function mapProductData(product, field) {
             product.totalPrice = price;
             break;
         default:
-            console.log('label not in switch: ' + field.label)
             break;
     }
 
