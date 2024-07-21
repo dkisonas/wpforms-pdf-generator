@@ -25,13 +25,16 @@ function handleButtonClick(event) {
         clearForm();
     } else if (target && target.classList.contains('wpforms-submit') && !allowFormSubmit) {
         event.preventDefault();
+        const form = getForm();
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
         const productData = collectStructuredFormData('product');
         saveProductDataToLocalStorage(productData);
         const personalData = JSON.parse(localStorage.getItem('personalData')) || [];
-        const allData = { personalData, products: JSON.parse(localStorage.getItem('productData')) || [] };
-        console.log('allData:' + allData)
+        const allData = {personalData, products: JSON.parse(localStorage.getItem('productData')) || []};
         const invoiceData = mapDataToInvoice(allData);
-        console.log('invoiceData:', invoiceData);
         sendFormDataToServer(invoiceData, event);
     }
 }
@@ -61,19 +64,21 @@ function resetLocalStorage() {
 
 function saveProductDataToLocalStorage(productData) {
     const storedData = JSON.parse(localStorage.getItem('productData')) || [];
-    console.log('saving product: ', productData)
     storedData.push(productData);
     localStorage.setItem('productData', JSON.stringify(storedData));
 }
 
 function savePersonalDataToLocalStorage() {
     const personalData = collectStructuredFormData('personal');
-    console.log('saving personal data:', personalData)
     localStorage.setItem('personalData', JSON.stringify(personalData));
 }
 
+function getForm() {
+    return document.getElementById(FORM_ID);
+}
+
 function collectStructuredFormData(type) {
-    const form = document.getElementById(FORM_ID);
+    const form = getForm();
     if (!form) {
         console.error('Form not found');
         return [];
@@ -141,32 +146,16 @@ function sendFormDataToServer(data, event) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
-    }).then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.blob();
-        })
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = 'generated_pdf.pdf';
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
+    }).then(_ => {
         allowFormSubmit = true;
         resetLocalStorage();
-        // event.target.click();
+        event.target.click();
     })
 }
 
 function clearForm() {
-    const form = document.getElementById(FORM_ID);
+    const form = getForm();
     if (form) {
         form.reset();
-    } else {
-        console.error('Form not found');
     }
 }

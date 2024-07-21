@@ -114,7 +114,9 @@ function mapProductData(product, field) {
             product.isReplacementWorkNeeded = value;
             break;
         case fieldLabel.includes('galutinė kaina'):
-            const price = parseFloat(value.replace(/[^0-9,.-]+/g, "").replace(',', '.'));
+            const cleanedValue = value.replace(/[^0-9,.,-]+/g, "");
+            const normalizedValue = cleanedValue.replace(/\./g, "").replace(',', '.');
+            const price = parseFloat(normalizedValue);
             product.totalPrice = price;
             break;
         default:
