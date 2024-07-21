@@ -26,8 +26,10 @@ function handleButtonClick(event) {
     } else if (target && target.classList.contains('wpforms-submit') && !allowFormSubmit) {
         event.preventDefault();
         const form = getForm();
-        if (!form.checkValidity()) {
-            form.reportValidity();
+        const invalidElements = getInvalidElements(form);
+
+        if (invalidElements.length > 0) {
+            invalidElements[0].reportValidity();
             return;
         }
         const productData = collectStructuredFormData('product');
@@ -158,4 +160,15 @@ function clearForm() {
     if (form) {
         form.reset();
     }
+}
+
+function getInvalidElements(form) {
+    const invalidElements = [];
+    const fields = form.querySelectorAll('input, select, textarea');
+    fields.forEach(field => {
+        if (field.required && !field.disabled && field.offsetParent !== null && !field.checkValidity()) {
+            invalidElements.push(field);
+        }
+    });
+    return invalidElements;
 }
