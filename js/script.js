@@ -17,8 +17,6 @@ function handleButtonClick(event) {
 
     if (target && target.classList.contains('wpforms-page-next')) {
         savePersonalDataToLocalStorage();
-        console.log('saved personal data:', JSON.parse(localStorage.getItem('personalData')) || [])
-
         setTimeout(addGenerateProductButton, 100);
     } else if (target && target.id === 'button-add-product') {
         event.preventDefault();
@@ -31,7 +29,7 @@ function handleButtonClick(event) {
         saveProductDataToLocalStorage(productData);
         const personalData = JSON.parse(localStorage.getItem('personalData')) || [];
         const allData = { personalData, products: JSON.parse(localStorage.getItem('productData')) || [] };
-        console.log(allData)
+        console.log('allData:' + allData)
         const invoiceData = mapDataToInvoice(allData);
         console.log('invoiceData:', invoiceData);
         sendFormDataToServer(invoiceData, event);
@@ -63,12 +61,14 @@ function resetLocalStorage() {
 
 function saveProductDataToLocalStorage(productData) {
     const storedData = JSON.parse(localStorage.getItem('productData')) || [];
+    console.log('saving product: ', productData)
     storedData.push(productData);
     localStorage.setItem('productData', JSON.stringify(storedData));
 }
 
 function savePersonalDataToLocalStorage() {
     const personalData = collectStructuredFormData('personal');
+    console.log('saving personal data:', personalData)
     localStorage.setItem('personalData', JSON.stringify(personalData));
 }
 
@@ -158,7 +158,7 @@ function sendFormDataToServer(data, event) {
                 window.URL.revokeObjectURL(url);
         allowFormSubmit = true;
         resetLocalStorage();
-        event.target.click();
+        // event.target.click();
     })
 }
 
