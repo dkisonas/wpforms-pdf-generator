@@ -17,7 +17,7 @@ export function mapDataToInvoice(data) {
         productFields.forEach(field => {
             mapProductData(product, field);
         });
-        product.basePrice = product.totalPrice / product.quantity
+        product.basePrice = parseFloat((product.totalPrice / product.quantity).toFixed(2));
         return product;
     });
 
@@ -113,10 +113,9 @@ function mapProductData(product, field) {
             product.isReplacementWorkNeeded = value;
             break;
         case fieldLabel.includes('galutinė kaina'):
-            const cleanedValue = value.replace(/[^0-9,.,-]+/g, "");
-            const normalizedValue = cleanedValue.replace(/\./g, "").replace(',', '.');
+            const normalizedValue = value.replace(/,/g, ".");
             const price = parseFloat(normalizedValue);
-            product.totalPrice = price;
+            product.totalPrice = parseFloat(price.toFixed(2));
             break;
         default:
             break;

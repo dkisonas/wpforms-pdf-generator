@@ -86,11 +86,10 @@ function log_message($message): void
     }
 }
 
-function upload_pdf_to_wordpress(?string $output): string
+function upload_pdf_to_wordpress(?string $output, string $filename): string
 {
     $upload_dir = wp_upload_dir();
-    $unique_filename = 'generated_pdf_' . uniqid() . '.pdf';
-    $pdf_path = $upload_dir['path'] . '/' . $unique_filename;
+    $pdf_path = $upload_dir['path'] . '/' . $filename;
     file_put_contents($pdf_path, $output);
     return $pdf_path;
 }
@@ -102,5 +101,5 @@ function get_company_name(): string
 
 function get_company_email(): string
 {
-    return "domkisonas@gmail.com";
+    return "stiklopaketai24@gmail.com";
 }

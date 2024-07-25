@@ -4,8 +4,9 @@ use classes\InvoiceData;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
-function create_and_stream_pdf($html): string
+function create_and_stream_pdf(InvoiceData $invoice_data): string
 {
+    $html = generate_html($invoice_data);
     $options = new Options();
     $options->set('isHtml5ParserEnabled', true);
     $options->set('isFontSubsettingEnabled', true);
@@ -14,11 +15,15 @@ function create_and_stream_pdf($html): string
     $dompdf->loadHtml($html);
     $dompdf->setPaper('A4');
     $dompdf->render();
-    $dompdf->stream("generated_pdf", array("Attachment" => 1));
+    $dompdf->stream();
+
+    $address = $invoice_data->personalData->address;
+    $filename = "isankstine_saskaita_faktura_$address.pdf";
+    $dompdf->stream($filename, array("Attachment" => 1));
 
     $output = $dompdf->output();
 
-    return upload_pdf_to_wordpress($output);
+    return upload_pdf_to_wordpress($output, $filename);
 }
 
 function generate_html(InvoiceData $invoiceData): bool|string
@@ -35,7 +40,7 @@ function generate_html(InvoiceData $invoiceData): bool|string
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Invoice</title>
+        <title>Sąskaita faktūra <?= $invoice_number ?></title>
         <style>
             * {
                 font-family: DejaVu Sans, sans-serif;

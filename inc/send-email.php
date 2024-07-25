@@ -7,10 +7,10 @@ function send_email_to_user($to, $attachment_path): void {
     send_email_with_attachment($to, $subject, $body, $attachment_path);
 }
 
-function send_email_to_admin($attachment_path): void {
+function send_email_to_admin($attachment_path, $address): void {
     $company_name = get_company_name();
-    $subject = 'Naujai pateikta užklausa ' . $company_name;
-    $body = 'Naujai pateikta užklausa ' . $company_name;
+    $subject = $company_name . ' Išankstinė sąskaita faktūra ' . $address;
+    $body = $company_name . ' Išankstinė sąskaita faktūra ' . $address;
     $to = get_company_email();
     send_email_with_attachment($to, $subject, $body, $attachment_path);
 }

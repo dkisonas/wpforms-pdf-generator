@@ -1,6 +1,5 @@
-import { mapDataToInvoice } from './mapper.js';
+import {mapDataToInvoice} from './mapper.js';
 
-let allowFormSubmit = false;
 const FORM_ID = 'wpforms-form-1825';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -12,6 +11,21 @@ function initializeButtonListeners() {
     document.addEventListener('click', handleButtonClick);
 }
 
+function isFormInvalid() {
+    return !isFormValid();
+}
+
+function isFormValid() {
+    const form = getForm();
+    const invalidElements = getInvalidElements(form);
+
+    if (invalidElements.length > 0) {
+        return invalidElements[0].reportValidity();
+    }
+
+    return true;
+}
+
 function handleButtonClick(event) {
     const target = event.target;
 
@@ -20,24 +34,25 @@ function handleButtonClick(event) {
         setTimeout(addGenerateProductButton, 100);
     } else if (target && target.id === 'button-add-product') {
         event.preventDefault();
+        if (isFormInvalid()) {
+            return;
+        }
         const productData = collectStructuredFormData('product');
         saveProductDataToLocalStorage(productData);
         clearForm();
-    } else if (target && target.classList.contains('wpforms-submit') && !allowFormSubmit) {
+    } else if (target && target.classList.contains('wpforms-submit')) {
         event.preventDefault();
-        const form = getForm();
-        const invalidElements = getInvalidElements(form);
 
-        if (invalidElements.length > 0) {
-            invalidElements[0].reportValidity();
+        if (isFormInvalid()) {
             return;
         }
+
         const productData = collectStructuredFormData('product');
         saveProductDataToLocalStorage(productData);
         const personalData = JSON.parse(localStorage.getItem('personalData')) || [];
         const allData = {personalData, products: JSON.parse(localStorage.getItem('productData')) || []};
         const invoiceData = mapDataToInvoice(allData);
-        sendFormDataToServer(invoiceData, event);
+        sendFormDataToServer(invoiceData);
     }
 }
 
@@ -105,7 +120,7 @@ function collectStructuredFormData(type) {
             }
 
             if (value) {
-                structuredData.push({ label, value });
+                structuredData.push({label, value});
             }
         });
     });
@@ -140,7 +155,7 @@ function filterDataByType(data, type) {
     });
 }
 
-function sendFormDataToServer(data, event) {
+function sendFormDataToServer(data) {
     fetch(window.customNumberToWords.generatePdfUrl, {
         method: 'POST',
         headers: {
@@ -148,9 +163,8 @@ function sendFormDataToServer(data, event) {
         },
         body: JSON.stringify(data)
     }).then(_ => {
-        allowFormSubmit = true;
         resetLocalStorage();
-        event.target.click();
+        window.location.href = "https://stiklopaketai24.lt/pranesimas/";
     })
 }
 

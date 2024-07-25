@@ -2,7 +2,7 @@
 /*
 Plugin Name: WPForms Custom PDF
 Description: WPForms Custom PDF plugin
-Version: 2.0
+Version: 4.0
 Author: Your Name
 */
 
@@ -50,13 +50,12 @@ function generate_pdf(): void
         log_message('Data received: ' . json_encode($data));
 
         $invoice_data = map_data_to_objects($data);
-        $html = generate_html($invoice_data);
 
-        $pdf_path = create_and_stream_pdf($html);
+        $pdf_path = create_and_stream_pdf($invoice_data);
 
         log_message('PDF generated and saved to ' . $pdf_path);
 
-        send_email_to_admin($pdf_path);
+        send_email_to_admin($pdf_path, $invoice_data->personalData->address);
         send_email_to_user($invoice_data->personalData->email, $pdf_path);
 
         unlink($pdf_path);
